@@ -1,18 +1,21 @@
 == The Project
 
-NOTE: The YouTube videos and Developer's Guide are slightly out of date with respect to this template.  This template
-now uses Pathom for server-side mutation and query handling.  See `flechar/server_components/pathom_wrappers.clj` and
+NOTE: The YouTube videos and Developer's Guide are slightly out of date with respect to this template.
+This template now uses Pathom for server-side mutation and query handling.
+See `flechar/server_components/pathom_wrappers.clj` and
 `flechar/model/user.clj` for the macro definitions and examples of how to define
-query resolution and mutations on the server-side. The `defmutation` AND `defresolver` in this project look like
-`defn` instead of Fulcro's.
+query resolution and mutations on the server-side.
+The `defmutation` AND `defresolver` in this project look like `defn` instead of Fulcro's.
 
-IMPORTANT: This is a Tools Deps Project.  The `project.clj` file is *ONLY* for uberjar generation.  If you're
-opening this project in IntelliJ, open `deps.edn`, NOT `project.clj`.
+IMPORTANT: This is a Tools Deps Project.
+The `project.clj` file is *ONLY* for uberjar generation.
+When you open this project in IntelliJ, open `deps.edn`,
+NOT `project.clj` and NOT the project folder.
 
 Dependency Aliases:
 
-You will want to enable the `:dev` dependency while developing this project.  In IntelliJ this is in the
-"Clojure Deps" border tab window under "Aliases".
+You will want to enable the `:dev` dependency while developing this project.
+In IntelliJ this is in the "Clojure Deps" border tab window under "Aliases".
 
 The main project source is in `src/main`.
 

@@ -4,10 +4,10 @@
             [fulcro.client.network :as net]
             [fulcro.client.data-fetch :as df]))
 
-(defonce SPA (atom nil))
+(defonce single-page-app (atom nil))
 
 (defn mount []
-  (reset! SPA (fc/mount @SPA root/Root "app")))
+  (reset! single-page-app (fc/mount @single-page-app root/Root "app")))
 
 (defn start []
   (mount))
@@ -19,12 +19,12 @@
     (net/wrap-fulcro-request)))
 
 (defn ^:export init []
-  (reset! SPA (fc/make-fulcro-client
+  (reset! single-page-app (fc/make-fulcro-client
                 {:client-did-mount (fn [flechar]
                                      (df/load flechar :all-users root/User))
                  ;; This ensures your client can talk to a CSRF-protected server.
                  ;; See middleware.clj to see how the token is embedded into the HTML
-                 :networking       {:remote (net/fulcro-http-remote
-                                              {:url                "/api"
-                                               :request-middleware secured-request-middleware})}}))
+                 :networking {:remote (net/fulcro-http-remote
+                                        {:url                "/api"
+                                         :request-middleware secured-request-middleware})}}))
   (start))
