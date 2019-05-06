@@ -1,9 +1,9 @@
 (ns flechar.ui.components
   (:require
-    [fulcro.client.primitives :as prim :refer [defsc]]
+    [fulcro.client.primitives :as prim]
     [fulcro.client.dom :as dom]))
 
-(defsc PlaceholderImage
+(prim/defsc PlaceholderImage
   "Generates an SVG image placeholder of the given size and with the given label
   (defaults to showing 'w x h'.
 

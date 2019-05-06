@@ -1,12 +1,12 @@
 (ns user
   (:require
-    [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs]]
-    [mount.core :as mount]
+    [clojure.tools.namespace.repl :as tools-ns]
+    [mount.core :as mount]))
     ;; this is the top-level dependent component...mount will find the rest via ns requires
-    [flechar.server-components.http-server :refer [http-server]]))
+;; [flechar.server-components.http-server :as fhs]))
 
 ;; ==================== SERVER ====================
-(set-refresh-dirs "src/main" "src/dev" "src/test")
+(tools-ns/set-refresh-dirs "src/main" "src/dev" "src/test")
 
 (defn start
   "Start the web server"

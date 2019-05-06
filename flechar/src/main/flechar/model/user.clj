@@ -1,12 +1,13 @@
 (ns flechar.model.user
   (:require
     [com.wsscode.pathom.connect :as pc]
-    [flechar.server-components.pathom-wrappers :refer [defmutation defresolver]]
+    [flechar.server-components.pathom-wrappers :as pw]
     [taoensso.timbre :as log]))
 
 (def user-database (atom {}))
 
-(defresolver all-users-resolver
+(pw/defresolver
+  all-users-resolver
   "Resolve queries for :all-users."
   [env input]
   {;;GIVEN nothing
@@ -16,7 +17,8 @@
                 (fn [id] {:user/id id})
                 (keys @user-database))})
 
-(defresolver user-resolver
+(pw/defresolver
+  user-resolver
   "Resolve details of a single user.  (See pathom docs for adding batching)"
   [env {:user/keys [id]}]
   {::pc/input  #{:user/id}                                  ; GIVEN a user ID
@@ -25,7 +27,8 @@
   (when (contains? @user-database id)
     (get @user-database id)))
 
-(defresolver user-address-resolver
+(pw/defresolver
+  user-address-resolver
   "Resolve address details for a user.  Note the address data could be stored on the user in the database or elsewhere."
   [env {:user/keys [id]}]
   {::pc/input  #{:user/id}                                  ; GIVEN a user ID
@@ -37,7 +40,8 @@
    :address/state       "WI"
    :address/postal-code "99999"})
 
-(defmutation upsert-user
+(pw/defmutation
+  upsert-user
   "Add/save a user. Required parameters are:
 
   :user/id - The ID of the user

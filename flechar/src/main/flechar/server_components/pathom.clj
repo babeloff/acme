@@ -1,15 +1,15 @@
 (ns flechar.server-components.pathom
   (:require
-    [mount.core :refer [defstate]]
+    [mount.core :as core]
     [taoensso.timbre :as log]
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]
-    [com.wsscode.common.async-clj :refer [let-chan]]
+    [com.wsscode.common.async-clj :as async]
     [clojure.core.async :as async]
 
     ;; Central registry
-    [flechar.server-components.pathom-wrappers :refer [pathom-registry]]
-    [flechar.server-components.config :refer [config]]
+    [flechar.server-components.pathom-wrappers :as pw]
+    [flechar.server-components.config :as fcf]
 
     ;; ALL namespaces that use pathom-wrappers MUST be included for auto-registration to work
     flechar.model.user))
@@ -33,27 +33,27 @@
   (log/debug "Pathom transaction:" (pr-str tx))
   req)
 
-(defstate parser
-  :start
-  (let [real-parser (p/parallel-parser
-                      {::p/mutate  pc/mutate-async
-                       ::p/env     {::p/reader               [p/map-reader pc/parallel-reader
-                                                              pc/open-ident-reader p/env-placeholder-reader]
-                                    ::p/placeholder-prefixes #{">"}}
-                       ::p/plugins [(pc/connect-plugin {::pc/register (vec (vals @pathom-registry))})
-                                    (p/env-wrap-plugin (fn [env]
-                                                         ;; Here is where you can dynamically add things to the resolver/mutation
-                                                         ;; environment, like the server config, database connections, etc.
-                                                         (assoc env :config config)))
-                                    (preprocess-parser-plugin log-requests)
-                                    (p/post-process-parser-plugin p/elide-not-found)
-                                    p/request-cache-plugin
-                                    p/error-handler-plugin
-                                    p/trace-plugin]})
-        ;; NOTE: Add -Dtrace to the server JVM to enable Fulcro Inspect query performance traces to the network tab!
-        trace?      (not (nil? (System/getProperty "trace")))]
-    (fn wrapped-parser [env tx]
-      (async/<!! (real-parser env (if trace?
-                                    (conj tx :com.wsscode.pathom/trace)
-                                    tx))))))
+(core/defstate parser
+               :start
+               (let [real-parser (p/parallel-parser
+                                   {::p/mutate  pc/mutate-async
+                                    ::p/env     {::p/reader               [p/map-reader pc/parallel-reader
+                                                                           pc/open-ident-reader p/env-placeholder-reader]
+                                                 ::p/placeholder-prefixes #{">"}}
+                                    ::p/plugins [(pc/connect-plugin {::pc/register (vec (vals @pw/pathom-registry))})
+                                                 (p/env-wrap-plugin (fn [env]
+                                                                      ;; Here is where you can dynamically add things to the resolver/mutation
+                                                                      ;; environment, like the server config, database connections, etc.
+                                                                      (assoc env :config fcf/config)))
+                                                 (preprocess-parser-plugin log-requests)
+                                                 (p/post-process-parser-plugin p/elide-not-found)
+                                                 p/request-cache-plugin
+                                                 p/error-handler-plugin
+                                                 p/trace-plugin]})
+                     ;; NOTE: Add -Dtrace to the server JVM to enable Fulcro Inspect query performance traces to the network tab!
+                     trace? (not (nil? (System/getProperty "trace")))]
+                 (fn wrapped-parser [env tx]
+                   (async/<!! (real-parser env (if trace?
+                                                 (conj tx :com.wsscode.pathom/trace)
+                                                 tx))))))
 

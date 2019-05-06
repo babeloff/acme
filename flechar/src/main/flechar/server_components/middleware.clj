@@ -1,14 +1,13 @@
 (ns flechar.server-components.middleware
   (:require
-    [flechar.server-components.config :refer [config]]
-    [flechar.server-components.pathom :refer [parser]]
-    [mount.core :refer [defstate]]
+    [flechar.server-components.config :as fcf]
+    [flechar.server-components.pathom :as fp]
+    [mount.core :as core]
     [fulcro.server :as server]
-    [ring.middleware.defaults :refer [wrap-defaults]]
-    [ring.middleware.gzip :refer [wrap-gzip]]
-    [ring.util.response :refer [response file-response resource-response]]
+    [ring.middleware.defaults :as rd]
+    [ring.middleware.gzip :as rz]
     [ring.util.response :as resp]
-    [hiccup.page :refer [html5]]
+    [hiccup.page :as hic]
     [taoensso.timbre :as log]))
 
 (def ^:private not-found-handler
@@ -22,7 +21,7 @@
   (fn [request]
     (if (= uri (:uri request))
       (server/handle-api-request
-        parser
+        fp/parser
         ;; this map is `env`. Put other defstate things in this map and they'll be
         ;; added to the resolver/mutation env.
         {:ring/request request}
@@ -35,7 +34,7 @@
 ;; ================================================================================
 (defn index [csrf-token]
   (log/debug "Serving index.html")
-  (html5
+  (hic/html5
     [:html {:lang "en"}
      [:head {:lang "en"}
       [:title "Flechar : Manipulation of Structure"]
@@ -57,7 +56,7 @@
 ;; ================================================================================
 (defn wslive [csrf-token]
   (log/debug "Serving wslive.html")
-  (html5
+  (hic/html5
     [:html {:lang "en"}
      [:head {:lang "en"}
       [:title "devcards"]
@@ -86,18 +85,19 @@
       :else
       (ring-handler req))))
 
-(defstate middleware
+(core/defstate
+  middleware
   :start
-  (let [defaults-config (:ring.middleware/defaults-config config)
-        legal-origins   (get config :legal-origins #{"localhost"})]
+  (let [defaults-config (:ring.middleware/defaults-config fcf/config)
+        legal-origins (get fcf/config :legal-origins #{"localhost"})]
     (-> not-found-handler
-      (wrap-api "/api")
-      server/wrap-transit-params
-      server/wrap-transit-response
-      (wrap-html-routes)
-      ;; If you want to set something like session store, you'd do it against
-      ;; the defaults-config here (which comes from an EDN file, so it can't have
-      ;; code initialized).
-      ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
-      (wrap-defaults defaults-config)
-      wrap-gzip)))
+        (wrap-api "/api")
+        server/wrap-transit-params
+        server/wrap-transit-response
+        (wrap-html-routes)
+        ;; If you want to set something like session store, you'd do it against
+        ;; the defaults-config here (which comes from an EDN file, so it can't have
+        ;; code initialized).
+        ;; E.g. (rd/wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
+        (rd/wrap-defaults defaults-config)
+        rz/wrap-gzip)))

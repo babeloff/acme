@@ -1,12 +1,14 @@
 (ns flechar.sample-test
   (:require
-    [clojure.test :refer [deftest]]
-    [fulcro-spec.core :refer [specification provided behavior assertions]]))
+    [clojure.test :as ct]
+    [fulcro-spec.core :as fsc]))
 
 ; Tests for both client and server
-(deftest sample-test
-  (behavior "addition computes addition correctly"
-    (assertions
+(ct/deftest
+  sample-test
+  (fsc/behavior
+    "addition computes addition correctly"
+    (fsc/assertions
       "with positive integers"
       (+ 1 5 3) => 9
       "with negative integers"

@@ -1,15 +1,16 @@
 (ns flechar.server-components.http-server
   (:require
-    [flechar.server-components.config :refer [config]]
-    [flechar.server-components.middleware :refer [middleware]]
-    [mount.core :refer [defstate]]
-    [clojure.pprint :refer [pprint]]
+    [flechar.server-components.config :as cf]
+    [flechar.server-components.middleware :as fsc]
+    [mount.core :as core]
+    [clojure.pprint :as pp]
     [org.httpkit.server :as http-kit]
     [taoensso.timbre :as log]))
 
-(defstate http-server
+(core/defstate
+  http-server
   :start
-  (let [cfg (::http-kit/config config)]
-    (log/info "Starting HTTP Server with config " (with-out-str (pprint cfg)))
-    (http-kit/run-server middleware cfg))
+  (let [cfg (::http-kit/config cf/config)]
+    (log/info "Starting HTTP Server with config " (with-out-str (pp/pprint cfg)))
+    (http-kit/run-server fsc/middleware cfg))
   :stop (http-server))

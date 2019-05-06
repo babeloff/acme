@@ -1,6 +1,6 @@
 (ns flechar.server-components.config
   (:require
-    [mount.core :refer [defstate args]]
+    [mount.core :as core]
     [fulcro.server :as server]
     [taoensso.timbre :as log]))
 
@@ -14,10 +14,10 @@
     (log/merge-config! logging-config)))
 
 
-(defstate config
-  :start (let [{:keys [config] :or {config "config/dev.edn"}} (args)
-               configuration (server/load-config {:config-path config})]
-           (log/info "Loaded config" config)
-           (configure-logging! configuration)
-           configuration))
+(core/defstate config
+               :start (let [{:keys [config] :or {config "config/dev.edn"}} (core/args)
+                            configuration (server/load-config {:config-path config})]
+                        (log/info "Loaded config" config)
+                        (configure-logging! configuration)
+                        configuration))
 

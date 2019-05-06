@@ -1,7 +1,7 @@
 (ns flechar.model.user
   (:require
-    [fulcro.incubator.mutation-interface :as mi :refer [declare-mutation]]
-    [fulcro.client.mutations :as m :refer [defmutation]]))
+    [fulcro.incubator.mutation-interface :as mi]
+    [fulcro.client.mutations :as m]))
 
 (defn user-path
   "Normalized path to a user entity or field in Fulcro state-map"
@@ -14,8 +14,8 @@
   (assoc-in state-map (user-path id) user))
 
 ;; IF you declare your mutations like this, then you can use them WITHOUT quoting in the UI!
-(declare-mutation upsert-user `upsert-user)
-(defmutation upsert-user
+(mi/declare-mutation upsert-user `upsert-user)
+(m/defmutation upsert-user
   "Client Mutation: Upsert a user (full-stack. see CLJ version for server-side)."
   [{:user/keys [id name] :as params}]
   (action [{:keys [state]}]
