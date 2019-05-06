@@ -38,7 +38,7 @@
   (html5
     [:html {:lang "en"}
      [:head {:lang "en"}
-      [:title "Application"]
+      [:title "Flechar : Manipulation of Structure"]
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
       [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
@@ -46,7 +46,7 @@
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
      [:body
-      [:div#app]
+      [:div#flechar]
       [:script {:src "js/main/main.js"}]
       [:script "flechar.client.init();"]]]))
 
@@ -68,7 +68,7 @@
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
      [:body
-      [:div#app]
+      [:div#flechar]
       [:script {:src "workspaces/js/main.js"}]]]))
 
 (defn wrap-html-routes [ring-handler]
