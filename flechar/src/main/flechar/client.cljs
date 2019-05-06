@@ -2,7 +2,8 @@
   (:require [fulcro.client :as fc]
             [flechar.ui.root :as root]
             [fulcro.client.network :as net]
-            [fulcro.client.data-fetch :as df]))
+            [fulcro.client.data-fetch :as df]
+            [flechar.ui.user-comp :as fuc]))
 
 ;; Make a singleton for the flechar app
 (defonce single-page-app (atom nil))
@@ -26,7 +27,7 @@
     (fc/make-fulcro-client
       {:client-did-mount
                        (fn [flechar]
-                         (df/load flechar :all-users root/User))
+                         (df/load flechar :all-users fuc/User))
        ;; This ensures your client can talk to a CSRF-protected server.
        ;; See middleware.clj to see how the token is embedded into the HTML
        :networking {:remote (net/fulcro-http-remote
