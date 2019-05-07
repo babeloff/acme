@@ -8,6 +8,9 @@
 ;; Make a singleton for the flechar app
 (defonce single-page-app (atom nil))
 
+;; get current state at repl
+;; @(fulcro.client.primitives/app-state (get @flechar.client/single-page-app :reconciler))
+
 
 (defn mount []
   (reset! single-page-app (fc/mount @single-page-app root/Root "flechar")))

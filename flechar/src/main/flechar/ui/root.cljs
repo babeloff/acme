@@ -3,12 +3,12 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim]
     [flechar.ui.components :as comp]
-    [flechar.ui.user-comp :as fuc]
+    [flechar.ui.user-comp :as uuc]
     [taoensso.timbre :as log]))
 
 
 (prim/defsc Root [this {:keys [all-users]}]
-  {:query         [{:all-users (prim/get-query fuc/User)}]
+  {:query         [{:all-users (prim/get-query uuc/User)}]
    :initial-state {:all-users []}}
   (log/debug :query this)
   (dom/div :.ui.segments
@@ -38,5 +38,5 @@
       (dom/div :.content
                (dom/div "Your system has the following users in the database:")
                (dom/ul :.ui.list
-                       (map fuc/ui-user all-users))
-               (fuc/ui-user-button {:w 50 :h 50 :label "avatar"})))))
+                       (map uuc/ui-user all-users))
+               (uuc/ui-user-button {:w 50 :h 50 :label "avatar"})))))

@@ -72,11 +72,6 @@ depends on already:
 $ npm install
 ```
 
-or if you prefer `yarn`:
-
-```
-$ yarn install
-```
 
 Adding NPM Javascript libraries is as simple as adding them to your
 `package.json` file and requiring them! See the
@@ -85,9 +80,9 @@ for more information.
 
 == Development Mode
 
-Shadow-cljs handles the client-side development build. The file
-`src/main/flechar/client.cljs` contains the code to start and refresh
-the client for hot code reload.
+Shadow-cljs handles the client-side development build.
+The file `src/main/flechar/client.cljs` contains the code to start
+and refresh the client for hot code reload.
 
 In general it is easiest just to run the compiler in server mode:
 
@@ -108,8 +103,8 @@ shadow-cljs - nREPL server started on port 9000
 then *navigate to the server URL* (shown in this example as http://localhost:9630) and
 use the *Builds* menu to enable/disable whichever builds you want watched/running.
 
-Shadow-cljs will also start a web server for any builds that configure one. This
-template configures one for workspaces, and one for tests:
+Shadow-cljs will also start a web server for any builds that configure one.
+This template configures one for workspaces, and one for tests:
 
 - Workspaces: [http://localhost:8023/workspaces](http://localhost:8023/workspaces)
 - Tests: [http://localhost:8022](http://localhost:8022)
@@ -118,8 +113,8 @@ See the server section below for working on the full-stack flechar itself.
 
 === Client REPL
 
-The shadow-cljs compiler starts an nREPL. It is configured to start on
-port 9000 (in `shadow-cljs.edn`).
+The shadow-cljs compiler starts an nREPL.
+It is configured to start on port 9000 (in `shadow-cljs.edn`).
 
 In IntelliJ: add a *remote* Clojure REPL configuration with
 host `localhost` and port `9000`.
@@ -133,9 +128,6 @@ then something like:
 will connect you to the REPL for a specific build (NOTE: Make sure you have
 a browser running the result, or your REPL won't have anything to talk to!)
 
-If you're using CIDER
-see [the Shadow-cljs User's Guide](https://shadow-cljs.github.io/docs/UsersGuide.html#_cider)
-and the comments in `deps.edn` for more information.
 
 === The API Server
 
@@ -154,7 +146,8 @@ user=> (restart) ; stop, reload server code, and go again
 user=> (tools-ns/refresh) ; retry code reload if hot server reload fails
 ```
 
-The `-J-Dtrace` adds a JVM argument that will enable performance tracing for Fulcro Inspect's network tab so you can
+The `-J-Dtrace` adds a JVM argument that will enable performance tracing
+for Fulcro Inspect's network tab so you can
 see how your resolvers and mutations are performing!
 
 The URL to work on your application is then
