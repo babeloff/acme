@@ -1,16 +1,23 @@
 (ns flechar.ui.user-comp
   (:require
+    ;; #?(:clj [fulcro.client.dom-server :as dom]
+    ;;   :cljs [fulcro.client.dom :as dom]
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim]
     [flechar.model.user :as user]
-    [flechar.ui.components :as comp]
+    [flechar.ui.svg_comp :as comp]
     [taoensso.timbre :as log]))
 
 
 (prim/defsc User [this {:user/keys    [name]
                         :address/keys [street city]}]
-  {:query [:user/id :user/name :address/street :address/city]
-   :ident [:user/id :user/id]}
+  {:query         [:user/id :user/name :address/street :address/city]
+   :initial-state (fn [_]
+                    {:user/id        "fred01",
+                     :user/name      "Fred",
+                     :address/street "Main",
+                     :address/city   "Nashville"})
+   :ident         [:user/id :user/id]}
   (dom/li :.ui.item
           (dom/div :.content)
           (str name (when street (str " of " street ", " city)))))
@@ -21,8 +28,9 @@
 
 
 (prim/defsc UserButton [this {:user/keys [id]}]
-  {:query [:user/id]
-   :ident [:user/id]}
+  {:query         [:user/id]
+   :initial-state {:user/id "barney01"}
+   :ident         [:user/id]}
   (dom/button
     :.ui.icon.button
     {:onClick
