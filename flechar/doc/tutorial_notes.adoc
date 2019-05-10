@@ -1,0 +1,45 @@
+
+http://book.fulcrologic.com/#_feeding_the_data_tree
+
+## 2.5.2 Initial State
+
+(fulcro.client.primitives/get-initial-state flechar.ui.root/Root {})
+
+@(fulcro.client.primitives/app-state (get @flechar.client/single-page-app :reconciler))
+
+
+## 2.5.3 Queries
+
+(def init-friends
+    {:person-type/friends
+     {:person-list/label "Friends",
+      :person-list/people
+      [{:person/name "Sally", :person/age 32}
+       {:person/name "Joe", :person/age 22}]},
+     :person-type/enemies
+     {:person-list/label "Enemies",
+      :person-list/people
+      [{:person/name "Fred", :person/age 11}
+       {:person/name "Bobby", :person/age 55}]}})
+
+(def query-friends-1
+  [{:person-type/friends
+    [ :person-list/label
+      {:person-list/people
+         [:person/name :person/age]}]}])
+
+(def query-friends-2
+   [{:person-type/friends [:person-list/label]}])
+
+(fulcro.client.primitives/db->tree query-friends-2 init-friends {})
+
+(def app-state
+  @(fulcro.client.primitives/app-state (get @flechar.client/single-page-app :reconciler)))
+
+(fulcro.client.primitives/db->tree [{:user/id []}] app-state {})
+
+
+(fulcro.client.primitives/get-query flechar.ui.root/Root {})
+
+(fulcro.client.primitives/get-query flechar.ui.user-comp/User {})
+(fulcro.client.primitives/get-initial-state flechar.ui.user-comp/User {})
