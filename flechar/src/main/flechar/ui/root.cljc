@@ -5,6 +5,7 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim]
     [flechar.ui.person-comp :as pc]
+    [flechar.model.person :as mp]
     [flechar.ui.svg_comp :as svg]
     [flechar.ui.user-comp :as uuc]
     [taoensso.timbre :as log]))
@@ -28,7 +29,7 @@
                "Structures are grounded in structured collections of arrows and paths. "
                "Primarily we are concerned with visualizations of categories, i.e. structures of arrows. "
                "We make use of open source libraries for visualizing and editing structures. ")
-             (dom/ul
+             (dom/ul :.ui.list
                (dom/li :.ui.item
                        (dom/p (dom/a {:href "http://js.cytoscape.org/"} "cytoscape")
                               " for styled 2D graph visualization. With layout algorithm. "))

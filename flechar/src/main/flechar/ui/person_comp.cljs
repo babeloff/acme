@@ -4,7 +4,7 @@
     ;;   :cljs [fulcro.client.dom :as dom]
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim]
-    ;; [flechar.model.person :as person]
+    [flechar.model.person :as person]
     [taoensso.timbre :as log]))
 
 
@@ -37,7 +37,7 @@
                                    [(prim/get-initial-state Person {:name "Veroniqua" :age 14})
                                     (prim/get-initial-state Person {:name "Betty" :age 15})])})}
 
-  (let [delete-person (fn [name] (log/info label "asked to delete" name))]
+  (let [delete-person (fn [name] (prim/transact! this `[(person/delete-person {:list-name ~label, :name ~name})]))]
     (dom/div
       (dom/h4 label)
       (dom/ul
