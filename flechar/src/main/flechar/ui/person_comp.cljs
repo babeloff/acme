@@ -37,7 +37,9 @@
                                    [(prim/get-initial-state Person {:name "Veroniqua" :age 14})
                                     (prim/get-initial-state Person {:name "Betty" :age 15})])})}
 
-  (let [delete-person (fn [name] (prim/transact! this `[(person/delete-person {:list-name ~label, :name ~name})]))]
+  (let [delete-person (fn [name]
+                        (prim/transact! this
+                                        `[(person/delete-person {:list-name ~label, :name ~name})]))]
     (dom/div
       (dom/h4 label)
       (dom/ul

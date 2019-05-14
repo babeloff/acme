@@ -15,6 +15,7 @@
 
 ;; IF you declare your mutations like this, then you can use them WITHOUT quoting in the UI!
 (mi/declare-mutation upsert-user `upsert-user)
+
 (mu/defmutation upsert-user
   "Client Mutation: Upsert a user (full-stack. see CLJ version for server-side)."
   [{:user/keys [id name] :as params}]
@@ -24,3 +25,11 @@
                              (insert-user* params)
                              (mu/integrate-ident* [:user/id id] :append [:all-users])))))
   (remote [env] true))
+
+(mu/defmutation remove-user
+  "Client Mutation: Remove a user."
+  [{:user/keys [id name] :as params}]
+  (action [{:keys [state]}]
+          (let [old-list (get-in @state :user/path)
+                new-list (vec (filter #(not= (:person/name %) name) old-list))]
+            (swap! state assoc-in :user/path new-list))))

@@ -1,11 +1,9 @@
 (ns flechar.ui.root
   (:require
-    ;; #?(:clj [fulcro.client.dom-server :as dom]
-    ;;   :cljs [fulcro.client.dom :as dom]
-    [fulcro.client.dom :as dom]
+    #?(:clj  [fulcro.client.dom-server :as dom]
+       :cljs [fulcro.client.dom :as dom])
     [fulcro.client.primitives :as prim]
     [flechar.ui.person-comp :as pc]
-    [flechar.model.person :as mp]
     [flechar.ui.svg_comp :as svg]
     [flechar.ui.user-comp :as uuc]
     [taoensso.timbre :as log]))
