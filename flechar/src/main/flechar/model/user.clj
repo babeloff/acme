@@ -11,11 +11,11 @@
   "Resolve queries for :all-users."
   [env input]
   {;;GIVEN nothing
-   ::pc/output [{:all-users [:user/id]}]}                   ;; I can output all users. NOTE: only ID is needed...other resolvers resolve the rest
+   ::pc/output [{:root/all-users [:user/id]}]}                   ;; I can output all users. NOTE: only ID is needed...other resolvers resolve the rest
   (log/info "All users. Database contains: " @user-database)
-  {:all-users (mapv
-                (fn [id] {:user/id id})
-                (keys @user-database))})
+  {:root/all-users (mapv
+                     (fn [id] {:user/id id})
+                     (keys @user-database))})
 
 (pw/defresolver
   user-resolver

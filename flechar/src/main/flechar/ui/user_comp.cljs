@@ -5,46 +5,54 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim]
     [flechar.model.user :as user]
-    [flechar.ui.svg_comp :as comp]
+    [flechar.ui.svg_comp :as svg]
     [taoensso.timbre :as log]))
 
 
-(prim/defsc User [this {:user/keys    [name]
-                        :address/keys [street city]}]
-  {:query         [:user/id :user/name :address/street :address/city]
-   :initial-state (fn [_]
-                    {:user/id        "fred01",
-                     :user/name      "Fred",
-                     :address/street "Main",
-                     :address/city   "Nashville"})
-   :ident         [:user/id :user/id]}
-  (dom/li :.ui.item
-          (dom/div :.content)
-          (str name (when street (str " of " street ", " city)))))
+(prim/defsc User
+  [_ props]
 
-(def ui-user (prim/factory User {:keyfn :user/id}))
+  {:query         [:db/id :user/name :address/street :address/city]
+   :ident         [:user/by-id :db/id]
+   :initial-state (fn [{:keys [id name street city]}]
+                    {:db/id          id
+                     :user/name      name
+                     :address/street street
+                     :address/city   city})}
+
+  (let [{:keys [db/id user/name address/street address/city]} props]
+    (dom/li {:key id :id id :className "ui.item"}
+            (dom/div {:className "content"}
+              (str name " " id (when street (str " of " street ", " city)))))))
+
+(def ui-user (prim/factory User {:keyfn :db/id}))
 
 
 
 
-(prim/defsc UserButton [this {:user/keys [id]}]
-  {:query         [:user/id]
-   :initial-state {:user/id "barney01"}
-   :ident         [:user/id]}
-  (dom/button
-    :.ui.icon.button
-    {:onClick
-     (fn []
-       (let [id (str (random-uuid))]
-         (log/info "Adding user")
-         ;; NOTE: The lack of quoting works because we're using declare-mutation from incubator. see model.cljs
-         ;; NOTE 2: This is a "mutation join".  The mutation is sent with a query, and on success it
-         ;; returns the user.  This allows the server to tack on an address without us specifying it,
-         ;; and also have the local database/ui update with it.
-         (prim/transact! this [{(user/upsert-user {:user/id   id
-                                                   :user/name (str "User " id)})
-                                (prim/get-query User)}])))}
-    (dom/i :.plus.icon)
-    "Add User"))
+(prim/defsc UserButton
+  [this props]
 
-(def ui-user-button (prim/factory UserButton))
+  {:query         [:db/id :user-button/width :user-button/height :user-button/label]
+   :ident         [:user-button/by-id :db/id]
+   :initial-state (fn [{:keys [id w h label]}]
+                    {:db/id id
+                     :user-button/width w
+                     :user-button/height h
+                     :user-button/label label})}
+
+  (let [{:keys [db/id]} props]
+    (dom/button
+      {:key id
+       :id id
+       :className "ui.icon.button"
+       :onClick
+       (fn []
+         (let [user-id (str (random-uuid))]
+           (log/info "Adding user " user-id " to " id)
+           (prim/transact! this [{(user/upsert-user {:db/id   user-id
+                                                     :user/name (str "User " user-id)})
+                                  (prim/get-query User)}])))}
+      (dom/i {:className "plus.icon"} "Add User"))))
+
+(def ui-user-button (prim/factory UserButton {:keyfn :user-button/id}))

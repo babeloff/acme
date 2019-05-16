@@ -4,14 +4,15 @@
   "description": "",
   "private": true,
   "dependencies": {
-    "cytoscape": "^3.6.0",
+    "react-cytoscapejs": "^1.1.0",
     "deck.gl": "^7.0.5",
     "highlight.js": "^9.13.1",
     "react-grid-layout": "^0.16.6",
     "react-icons": "^2.2.7",
     "reakit": "^0.11.2",
     "three-all": "^0.82.11",
-    "three.js": "^0.77.1"
+    "three.js": "^0.77.1",
+    "victory": "^32.2.3"
   },
   "devDependencies": {
     "intl-messageformat": "^2.2.0",

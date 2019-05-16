@@ -29,11 +29,11 @@
     single-page-app
     (fc/make-fulcro-client
       {:client-did-mount
-                       (fn [flechar]
-                         (df/load flechar :all-users fuc/User))
+                   (fn [flechar]
+                     (df/load flechar :root/all-users fuc/User))
        ;; This ensures your client can talk to a CSRF-protected server.
        ;; See middleware.clj to see how the token is embedded into the HTML
        :networking {:remote (net/fulcro-http-remote
-                                  {:url                "/api"
-                                   :request-middleware secured-request-middleware})}}))
+                              {:url                "/api"
+                               :request-middleware secured-request-middleware})}}))
   (start))
