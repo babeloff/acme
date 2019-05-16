@@ -1,4 +1,4 @@
-(ns flechar.ui.person-comp
+(ns flechar.ui.person
   (:require
     ;; #?(:clj [fulcro.client.dom-server :as dom]
     ;;   :cljs [fulcro.client.dom :as dom]

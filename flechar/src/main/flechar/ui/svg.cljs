@@ -1,4 +1,4 @@
-(ns flechar.ui.svg_comp
+(ns flechar.ui.svg
   (:require
     ;; #?(:clj [fulcro.client.dom-server :as dom]
     ;;   :cljs [fulcro.client.dom :as dom]
@@ -18,7 +18,7 @@
   (let [{:keys [db/id svg/w svg/h svg/label]} props]
     (let [label (or label (str w "x" h))]
       (dom/svg #js {:width w :height h}
-               (dom/rect #js {:width w :height h :style #js {:fill "rgb(100,200,200)"
+               (dom/rect #js {:width w :height h :style #js {:fill        "rgb(100,200,200)"
                                                              :strokeWidth 2
                                                              :stroke      "black"}})
                (dom/text #js {:textAnchor "middle" :x (/ w 2) :y (/ h 2)} label)))))

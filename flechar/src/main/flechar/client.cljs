@@ -3,7 +3,7 @@
             [flechar.ui.root :as root]
             [fulcro.client.network :as net]
             [fulcro.client.data-fetch :as df]
-            [flechar.ui.user-comp :as fuc]))
+            [flechar.ui.user :as fuc]))
 
 ;; Make a singleton for the flechar app
 (defonce single-page-app (atom nil))
