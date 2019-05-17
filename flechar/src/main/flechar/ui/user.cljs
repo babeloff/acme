@@ -15,15 +15,11 @@
   {:query         [:db/id :user/name :address/street :address/city]
    :ident         [:user/by-id :db/id]
    :initial-state (fn [{:keys [id name street city]}]
-                    {:db/id          id
-                     :user/name      name
-                     :address/street street
-                     :address/city   city})}
+                    {})}
 
   (let [{:keys [db/id user/name address/street address/city]} props]
-    (dom/li {:key id :id id :className "ui.item"}
-            (dom/div {:className "content"}
-                     (str name " " id (when street (str " of " street ", " city)))))))
+    (dom/li {:key name :id id :className "ui.item"}
+            (str name " " id (when street (str " of " street ", " city))))))
 
 (def ui-user (prim/factory User {:keyfn :db/id}))
 
@@ -53,6 +49,7 @@
                       (prim/transact! this [{(user/upsert-user {:db/id     user-id
                                                                 :user/name (str "User " user-id)})
                                              (prim/get-query User)}])))}
+
       (dom/i {:className "plus.icon"} "Add User"))))
 
 (def ui-user-button (prim/factory UserButton {:keyfn :user-button/id}))

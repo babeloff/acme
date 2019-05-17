@@ -4,21 +4,16 @@
       ["victory" :as vic]
       [fulcro.client.dom :as dom]
       [fulcro.client.primitives :as prim]
-      [fulcro.util :as util]))
+      [fulcro.util :as util]
+      [flechar.ui.helper :as help]))
 
 (defn us-dollars [n]
   (str "$ " (pp/cl-format nil "~:d" n)))
 
-(letfn [(factory-apply
-          [class]
-          (fn [props & children]
-            (apply js/React.createElement
-                   class
-                   props
-                   children)))]
-  (def vchart (factory-apply vic/VictoryChart))
-  (def vaxis (factory-apply vic/VictoryAxis))
-  (def vline (factory-apply vic/VictoryLine)))
+
+(def vchart (help/factory-apply vic/VictoryChart))
+(def vaxis (help/factory-apply vic/VictoryAxis))
+(def vline (help/factory-apply vic/VictoryLine))
 
 
 ;; " [ {:year 1991 :value 2345 } ...] "
@@ -59,6 +54,14 @@
 
 
 
+(def vpie (help/factory-apply vic/VictoryPie))
+
+(prim/defsc PieChart [_ props]
+  (vpie nil))
+
+(def ui-pie-chart (prim/factory PieChart))
+
+
 (prim/defsc VictorChartSet [_ props]
   {:query [:label :x-step :plot-data [{:year :value}]]
    :ident [:victor-chart-set/by-id :label]
@@ -86,6 +89,9 @@
                          {:year 2000 :value 180}
                          {:year 2001 :value 200}]})}
   (let [{:keys []} props]
-    (ui-yearly-value-chart props)))
+    [(dom/div {:id "yearly-value-chart" :key "yearly-value-chart"}
+              (ui-yearly-value-chart props))
+     (dom/div {:id "pie-chart" :key "pie-chart"}
+              (ui-pie-chart props))]))
 
 (def ui-victor-charts (prim/factory VictorChartSet {:keyfn :victor-chart-set/id}))

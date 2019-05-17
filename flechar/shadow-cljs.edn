@@ -1,13 +1,13 @@
 {:deps   {:aliases [:dev]}
  :nrepl  {:port 9000}
- :builds {:main       {:target     :browser
-                       :output-dir "resources/public/js/main"
-                       :asset-path "/js/main"
+ :builds {:main       {:target       :browser
+                       :output-dir   "resources/public/js/main"
+                       :asset-path   "/js/main"
+                       :language-out :ecmascript5
+                       :modules      {:main {:entries [flechar.client]}}
 
-                       :modules    {:main {:entries [flechar.client]}}
-
-                       :devtools   {:after-load flechar.client/start
-                                    :preloads [fulcro.inspect.preload flechar.development-preload]}}
+                       :devtools     {:after-load flechar.client/start
+                                      :preloads   [fulcro.inspect.preload flechar.development-preload]}}
 
           :test       {:target           :browser-test
                        :test-dir         "resources/public/js/test"

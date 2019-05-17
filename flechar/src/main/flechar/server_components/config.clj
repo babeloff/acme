@@ -6,7 +6,7 @@
 
 
 (defn configure-logging! [config]
-  (let [{:keys [taoensso.timbre/logging-config]} config]
+  (let [{:keys [log/logging-config]} config]
     (fulcro.logging/set-logger!
       (fn [{:keys [file line]} level & args]
         (log/log! level :p [args] {:?ns-str file :?line line})))

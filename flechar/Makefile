@@ -4,4 +4,9 @@ test:
 	npx karma start --single-run
 	clj -A:dev:clj-tests
 
-.PHONY: test
+dev:
+	npm install
+	npx shadow-cljs server
+	clj -A:dev -J-Dtrace
+
+.PHONY: test dev
