@@ -8,8 +8,28 @@
     [flechar.ui.svg :as svg]
     [flechar.ui.user :as uuc]
     [flechar.ui.victory :as vic]
-    [flechar.ui.cyto :as cyto]
+    [flechar.ui.cytoscape :as cytoscape]
     [taoensso.timbre :as log]))
+
+(def elements
+  [{:data {:id "one", :label "Node 1"}, :position {:x 0, :y 0}},
+   {:data {:id "two", :label "Node 2"}, :position {:x 100, :y 0}},
+   {:data {:id "one-two" :source "one", :target "two", :label "Edge from Node1 to Node2"}}])
+
+(def stylesheet
+  [{:selector "node"
+    :style    {
+               "background-color" "#666"
+               "label"            "data(id)"}}
+   {:selector "edge"
+    :style    {
+               "width"              3
+               "line-color"         "#ccc"
+               "target-arrow-color" "#ccc"
+               "target-arrow-shape" "triangle"}}])
+
+(def layout {:name "grid" :rows 1})
+
 
 
 (prim/defsc Root [_ props]
@@ -103,8 +123,12 @@
       (dom/div {:className "ui.attached.segment"}
                (svg/ui-svg {:svg/w 250 :svg/h 50 :svg/label "svg"}))
 
-      (dom/div {:className "ui.attached.segment"}
-               (cyto/ui-cyto {:svg/w 250 :svg/h 50 :svg/label "cytoscape"}))
+      (dom/div {:className "ui.attached.segment" :id "cytoscape-container-01"}
+               (cytoscape/ui-cytoscape {:db/id                "cytoscape01"
+                                        :cytoscape/container  "cytoscape-container-01"
+                                        :cytoscape/elements   elements
+                                        :cytoscape/stylesheet stylesheet
+                                        :cytoscape/layout     layout}))
 
       (dom/div {:className "ui.attached.segment"}
                (svg/ui-svg {:svg/w 250 :svg/h 50 :svg/label "deck.gl"}))
