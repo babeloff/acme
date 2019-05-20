@@ -1,10 +1,16 @@
 {:deps   {:aliases [:dev]}
  :nrepl  {:port 9000}
- :builds {:main       {:target       :browser
+ :builds {:main       {:optimizations :advanced
+                       :target       :browser
+                       :js-options   {:js-provider :shadow
+                                      :resolve {"cytoscape" {:target :npm
+                                                             :require "cytoscape/dist/cytoscape.esm"}}}
+
                        :output-dir   "resources/public/js/main"
                        :asset-path   "/js/main"
-                       :language-out :ecmascript5
                        :modules      {:main {:entries [flechar.client]}}
+                       :compiler-options {:output-feature-set :es5}
+
 
                        :devtools     {:after-load flechar.client/start
                                       :preloads   [fulcro.inspect.preload flechar.development-preload]}}
@@ -12,7 +18,8 @@
           :test       {:target           :browser-test
                        :test-dir         "resources/public/js/test"
                        :ns-regexp        "-test$"
-                       :compiler-options {:static-fns false} ; required for mocking to work
+                       ; required for mocking to work
+                       :compiler-options {:static-fns false}
 
                        :devtools         {:http-port          8022
                                           :http-resource-root "public"
@@ -20,7 +27,8 @@
 
           :ci-tests   {:target           :karma
                        :js-options       {:js-provider :shadow}
-                       :compiler-options {:static-fns false} ; required for mocking to work
+                       ; required for mocking to work
+                       :compiler-options {:static-fns false}
                        :output-to        "target/ci.js"
                        :ns-regexp        "-test$"}
 

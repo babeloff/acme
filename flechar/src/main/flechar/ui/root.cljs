@@ -54,12 +54,14 @@
 
       :root/charts    (prim/get-initial-state vic/VictorChartSet {})})
 
+
+   ;;:getDerivedStateFromError
+   ;;(fn [error] (js/console.log "root :getDerivedStateFromError" error))
+
    :componentDidCatch
-   (fn [error info] (js/console.log "root :componentDidCatch" error info))
+   (fn [error info] (js/console.log "root :componentDidCatch" error info))}
 
 
-   :getDerivedStateFromError
-   (fn [error] (js/console.log "root :getDerivedStateFromError" error))}
 
   (let [{:keys [ui/react-key root/all-users root/friends root/enemies root/charts]} props]
     (log/info "starting root")

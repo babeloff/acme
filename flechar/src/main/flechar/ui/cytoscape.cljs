@@ -5,8 +5,8 @@
     [fulcro.client.primitives :as prim]
     [flechar.ui.helper :as help]
     [oops.core :as oops]
-    ["cytoscape" :as cytoscape]
-    ["prop-types" :default ptype]
+    ["cytoscape" :default cytoscape]
+    ["prop-types" :as pt]
     [taoensso.timbre :as log]))
 
 (defn at-key [obj key]
@@ -167,10 +167,14 @@
 
 (defn update-cytoscape
   [this prev-props new-props]
-  (let [cy (._cy this)
+  (let [cy (:cytoscape/impl this)
         {:keys [diff toJson get forEach]} new-props]
     (patch cy prev-props new-props diff toJson get forEach)
     (if (cy new-props) (cy new-props cy))))
+
+
+
+;; Stateful Component
 
 (prim/defsc CytoscapeComponent
   [this props]
@@ -178,6 +182,7 @@
    (fn [params]
      (let [{:keys [id container elements stylesheet layout]} params]
        {:db/id                id
+        :cytoscape/impl       nil
         :cytoscape/container  container
         :cytoscape/elements   elements
         :cytoscape/stylesheet stylesheet
@@ -190,7 +195,7 @@
 
    :query
    (fn []
-     [:db/id :cytoscape/container :cytoscape/elements :cytoscape/stylesheet :cytoscape/layout])
+     [:db/id :cytoscape/impl :cytoscape/container :cytoscape/elements :cytoscape/stylesheet :cytoscape/layout])
 
    :pre-merge
    (fn [env]
@@ -212,10 +217,10 @@
    :componentDidMount
    (fn []
      (log/info "react :componentDidMount")
-     (let [container (js/ReactDOM.findDOMNode this)
-           global (get (.props this) "global")
-           cy (.Cytoscape container)]
-       (set! (.-_cy this) cy)
+     (let [global (get (.-props this) "global")
+           container (js/ReactDOM.findDOMNode this)
+           cy (cytoscape #js {:container container})]
+       ;;(set! (.-_cy this) cy)
        (if global (set! (.-global js/window) cy))
        (update-cytoscape this nil (.-props this))))
 
@@ -227,186 +232,200 @@
    (fn [error info] (log/warn "react :componentDidCatch" error info))
 
    :getSnapshotBeforeUpdate
-   (fn [prev-props prev-state] (log/warn "react :getSnapshotBeforeUpdate" prev-props prev-state))
+   (fn [prev-props prev-state] (log/warn "react :getSnapshotBeforeUpdate" prev-props prev-state))}
 
-   :getDerivedStateFromProps
-   (fn [props state] (log/warn "react :getDerivedStateFromProps" props state))
+   ;;:getDerivedStateFromProps
+   ;;(fn [props state]
+   ;;  (log/warn "react :getDerivedStateFromProps\n" props "\n" state)
+   ;;  (super props state))
 
-   :getDerivedStateFromError
-   (fn [error] (log/warn "react :getDerivedStateFromError" error))}
+   ;; :getDerivedStateFromError
+   ;; (fn [error] (log/warn "react :getDerivedStateFromError" error))}
 
   ;; render
   (let [{id :db/id} props
         {:cytoscape/keys [class-name stylesheet]} props]
     (dom/div (clj->js {:id id :className class-name :style stylesheet}))))
 
+
+
 (def ui-cytoscape (prim/factory CytoscapeComponent {:keyfn :cytoscape/id :instrument? true}))
 
+(def cytoscapeDefaults 
+  {:identity #(%) 
+   :diff shallow-obj-diff 
+   :get cy-get-id
+   :to-json to-json 
+   :for-each for-each
+   :elements [
+              { :data { :id "a", :label "Example node A" } :position {:x 0 :y 0}}
+              { :data { :id "b", :label "Example node B" } :position {:x 100 :y 0}},
+              { :data { :id "e", :source "a", :target "b" :label "Edge from Node1 to Node2"}}]
+              ; 
+   :stylesheet  
+   [{:selector "node",
+     :style {:label "data(label)"}}]
+   
+   :zoom 1 
+   :pan { :x 0 :y 0}})
+                        
+                        
+  
 
-;; (def {:keys [ptype/object, ptype/number, ptype/bool, ptype/oneOfType, ptype/any, ptype/func]} ptype)
+;; (def {:keys [pt/PropTypes.object, pt/PropTypes.number, pt/PropTypes.bool, pt/PropTypes.oneOfType, pt/PropTypes.any, pt/PropTypes.func]} pt/PropTypes)
+(def cytoscapePropTypes
+  {
+   ;; The `id` HTML attribute of the component.
+   :id                  pt/PropTypes.string
 
-(comment (def types
-           {
-            ;; The `id` HTML attribute of the component.
-            :id                  ptype/string
+   ;; The `class` HTML attribute of the component.  Use this to set the dimensions of
+   ;; the graph visualisation via a style block in your CSS file.
+   :className           pt/PropTypes.string
 
-            ;; The `class` HTML attribute of the component.  Use this to set the dimensions of
-            ;; the graph visualisation via a style block in your CSS file.
-            :className           ptype/string
+   ;; The `style` HTML attribute of the component.  Use this to set the dimensions of
+   ;; the graph visualisation if you do not use separate CSS files.
+   :style               (pt/PropTypes.oneOfType #js [pt/PropTypes.string, pt/PropTypes.object])
 
-            ;; The `style` HTML attribute of the component.  Use this to set the dimensions of
-            ;; the graph visualisation if you do not use separate CSS files.
-            :style               (ptype/oneOfType [ptype/string, ptype/object])
+   ;; The flat list of Cytoscape elements to be included in the graph, each represented
+   ;; as non-stringified JSON.  E.g.: see default.elements
+   ;;
+   ;; See http://js.cytoscape.org/#notation/elements-json
+   :elements            (pt/PropTypes.oneOfType #js [pt/PropTypes.array, pt/PropTypes.any])
 
-            ;; The flat list of Cytoscape elements to be included in the graph, each represented
-            ;; as non-stringified JSON.  E.g.:
-            ;;
-            ;;```
-            ;; elements: [
-            ;;   { data: { id: 'one', label: 'Node 1' }, position: { x: 0, y: 0 } },
-            ;;   { data: { id: 'two', label: 'Node 2' }, position: { x: 100, y: 0 } },
-            ;;   { data: { source: 'one', target: 'two', label: 'Edge from Node1 to Node2'}}
-            ;; ]
-            ;;```
-            ;;
-            ;; See http://js.cytoscape.org/#notation/elements-json
-            :elements            (ptype/oneOfType [ptype/array, ptype/any])
+   ;; The Cytoscape stylesheet as non-stringified JSON.  E.g.:
+   ;;
+   ;;```
+   ;; stylesheet: [
+   ;;   {
+   ;;      selector: 'node',
+   ;;      style: {
+   ;;        'width': 30,
+   ;;        'height': 30,
+   ;;        'shape': 'rectangle'
+   ;;}
+   ;;}
+   ;;]
+   ;;```
+   ;;
+   ;; See http://js.cytoscape.org/#style
+   :stylesheet          (pt/PropTypes.oneOfType #js [pt/PropTypes.array, pt/PropTypes.any])
 
-            ;; The Cytoscape stylesheet as non-stringified JSON.  E.g.:
-            ;;
-            ;;```
-            ;; stylesheet: [
-            ;;   {
-            ;;      selector: 'node',
-            ;;      style: {
-            ;;        'width': 30,
-            ;;        'height': 30,
-            ;;        'shape': 'rectangle'
-            ;;}
-            ;;}
-            ;;]
-            ;;```
-            ;;
-            ;; See http://js.cytoscape.org/#style
-            :stylesheet          (ptype/oneOfType [ptype/array, ptype/any])
+   ;; Use a layout to automatically position the nodes in the graph.  E.g.
+   ;;
+   ;;```
+   ;; layout: { name: 'random'}
+   ;;```
+   ;;
+   ;; N.b. to use an external layout extension, you must register the extension
+   ;; prior to rendering this component, e.g.:
+   ;;
+   ;;```
+   ;; (require
+   ;;   ["cytoscape" :default Cytoscape]
+   ;;   ["cytoscape-cose-bilkent" :default COSEBilkent];
+   ;;
+   ;; Cytoscape.use(COSEBilkent);
+   ;;
+   ;; class MyApp extends React.Component {
+   ;;   render() {
+   ;;     const elements = [
+   ;;       { data: { id: 'one', :label 'Node 1' }, position: { x: 0, y: 0 } },
+   ;;       { data: { id: 'two', :label 'Node 2' }, position: { x: 100, y: 0 } },
+   ;;       { data: { :source 'one', :target 'two', :label 'Edge from Node1 to Node2'}}
+   ;;
+   ;;
+   ;;     const layout = { name: 'cose-bilkent'};
+   ;;
+   ;;     return <CytoscapeComponent elements={elements} layout={layout}>;
+   ;;
+   ;;
+   ;;```
+   ;;
+   ;; See http://js.cytoscape.org/#layouts
+   :layout              (pt/PropTypes.oneOfType #js [pt/PropTypes.object, pt/PropTypes.any])
 
-            ;; Use a layout to automatically position the nodes in the graph.  E.g.
-            ;;
-            ;;```
-            ;; layout: { name: 'random'}
-            ;;```
-            ;;
-            ;; N.b. to use an external layout extension, you must register the extension
-            ;; prior to rendering this component, e.g.:
-            ;;
-            ;;```
-            ;; (require
-            ;;   ["cytoscape" :default Cytoscape]
-            ;;   ["cytoscape-cose-bilkent" :default COSEBilkent];
-            ;;
-            ;; Cytoscape.use(COSEBilkent);
-            ;;
-            ;; class MyApp extends React.Component {
-            ;;   render() {
-            ;;     const elements = [
-            ;;       { data: { id: 'one', label: 'Node 1' }, position: { x: 0, y: 0 } },
-            ;;       { data: { id: 'two', label: 'Node 2' }, position: { x: 100, y: 0 } },
-            ;;       { data: { source: 'one', target: 'two', label: 'Edge from Node1 to Node2'}}
-            ;;
-            ;;
-            ;;     const layout = { name: 'cose-bilkent'};
-            ;;
-            ;;     return <CytoscapeComponent elements={elements} layout={layout}>;
-            ;;
-            ;;
-            ;;```
-            ;;
-            ;; See http://js.cytoscape.org/#layouts
-            :layout              (ptype/oneOfType [ptype/object, ptype/any])
+   ;; The panning position of the graph.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/pan
+   :pan                 (pt/PropTypes.oneOfType #js [pt/PropTypes.object, pt/PropTypes.any])
 
-            ;; The panning position of the graph.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/pan
-            :pan                 (ptype/oneOfType [ptype/object, ptype/any])
+   ;; The zoom level of the graph.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/zoom
+   :zoom                pt/PropTypes.number
 
-            ;; The zoom level of the graph.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/zoom
-            :zoom                ptype/number
+   ;; Whether the panning position of the graph is mutable overall.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/panningEnabled
+   :panningEnabled      pt/PropTypes.bool
 
-            ;; Whether the panning position of the graph is mutable overall.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/panningEnabled
-            :panningEnabled      ptype/bool
+   ;; Whether the panning position of the graph is mutable by user gestures (e.g. swipe).
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/userPanningEnabled
+   :userPanningEnabled  pt/PropTypes.bool
 
-            ;; Whether the panning position of the graph is mutable by user gestures (e.g. swipe).
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/userPanningEnabled
-            :userPanningEnabled  ptype/bool
+   ;; The minimum zoom level of the graph.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/minZoom
+   :minZoom             pt/PropTypes.number
 
-            ;; The minimum zoom level of the graph.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/minZoom
-            :minZoom             ptype/number
+   ;; The maximum zoom level of the graph.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/maxZoom
+   :maxZoom             pt/PropTypes.number
 
-            ;; The maximum zoom level of the graph.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/maxZoom
-            :maxZoom             ptype/number
+   ;; Whether the zoom level of the graph is mutable overall.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/zoomingEnabled
+   :zoomingEnabled      pt/PropTypes.bool
 
-            ;; Whether the zoom level of the graph is mutable overall.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/zoomingEnabled
-            :zoomingEnabled      ptype/bool
+   ;; Whether the zoom level of the graph is mutable by user gestures (e.g. pinch-to-zoom).
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/userZoomingEnabled
+   :userZoomingEnabled  pt/PropTypes.bool
 
-            ;; Whether the zoom level of the graph is mutable by user gestures (e.g. pinch-to-zoom).
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/userZoomingEnabled
-            :userZoomingEnabled  ptype/bool
+   ;; Whether shift+click-and-drag box selection is enabled.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/boxSelectionEnabled
+   :boxSelectionEnabled pt/PropTypes.bool
 
-            ;; Whether shift+click-and-drag box selection is enabled.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/boxSelectionEnabled
-            :boxSelectionEnabled ptype/bool
+   ;; If true, nodes automatically can not be grabbed regardless of whether
+   ;; each node is marked as grabbable.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/autoungrabify
+   :autoungrabify       pt/PropTypes.bool
 
-            ;; If true, nodes automatically can not be grabbed regardless of whether
-            ;; each node is marked as grabbable.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/autoungrabify
-            :autoungrabify       ptype/bool
+   ;; If true, nodes can not be moved at all.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/autolock
+   :autolock            pt/PropTypes.bool
 
-            ;; If true, nodes can not be moved at all.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/autolock
-            :autolock            ptype/bool
+   ;; If true, elements have immutable selection state.
+   ;;
+   ;; See http://js.cytoscape.org/#init-opts/autounselectify
+   :autounselectify     pt/PropTypes.bool
 
-            ;; If true, elements have immutable selection state.
-            ;;
-            ;; See http://js.cytoscape.org/#init-opts/autounselectify
-            :autounselectify     ptype/bool
+   ;; `get(object, key)`
+   ;; Get the value of the specified `object` at the `key`, which may be an integer
+   ;; in the case of lists/arrays or strings in the case of maps/objects.
+   :get                 pt/PropTypes.func
 
-            ;; `get(object, key)`
-            ;; Get the value of the specified `object` at the `key`, which may be an integer
-            ;; in the case of lists/arrays or strings in the case of maps/objects.
-            :get                 ptype/func
+   ;; `toJson(object)`
+   ;; Get the deep value of the specified `object` as non-stringified JSON.
+   :toJson              pt/PropTypes.func
 
-            ;; `toJson(object)`
-            ;; Get the deep value of the specified `object` as non-stringified JSON.
-            :toJson              ptype/func
+   ;; diff(objectA, objectB)
+   ;; Return whether the two objects have equal value. This is used to determine if
+   ;; and where Cytoscape needs to be patched.
+   :diff                pt/PropTypes.func
 
-            ;; diff(objectA, objectB)
-            ;; Return whether the two objects have equal value. This is used to determine if
-            ;; and where Cytoscape needs to be patched.
-            :diff                ptype/func
+   ;; forEach(list, iterator)
+   ;; Call `iterator` on each element in the `list`, in order.
+   :forEach             pt/PropTypes.func
 
-            ;; forEach(list, iterator)
-            ;; Call `iterator` on each element in the `list`, in order.
-            :forEach             ptype/func
-
-            ;; cy(cyRef)
-            ;; The `cy` prop allows for getting a reference to the `cy` Cytoscape object, e.g.:
-            ;;
-            ;; `<CytoscapeComponent cy={cy => (myCyRef = cy)} />`
-            :cy                  ptype/func}))
-
+   ;; cy(cyRef)
+   ;; The `cy` prop allows for getting a reference to the `cy` Cytoscape object, e.g.:
+   ;;
+   ;; `<CytoscapeComponent cy={cy => (myCyRef = cy)} />`
+   :cy                  pt/PropTypes.func})
 
